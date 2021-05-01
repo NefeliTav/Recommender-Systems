@@ -1,4 +1,6 @@
 import os
+import time
+from multiprocessing import Pool
 from surprise import SVD
 
 from surprise import Reader
@@ -7,105 +9,152 @@ from surprise import Dataset
 from surprise.model_selection import *
 from surprise.prediction_algorithms import *
 
-
 file_path = os.path.expanduser('./dataset/ratings_1.csv')
 reader = Reader(line_format='user item rating', sep=',',
                 rating_scale=[1, 5], skip_lines=1)
-data = Dataset.load_from_file(file_path, reader=reader)
+data1 = Dataset.load_from_file(file_path, reader=reader)
+file_path = os.path.expanduser('./dataset/ratings_2.csv')
+reader = Reader(line_format='user item rating', sep=',',
+                rating_scale=[1, 10], skip_lines=1)
+data2 = Dataset.load_from_file(file_path, reader=reader)
+jobs = 8  # number of cores
 
-########################################################################
+print("First Dataset\n")
+for data in [data1, data2]:
+    # Basic Algorithms
+    # normal distribution of the training set
+    algo = NormalPredictor()
+    cross_validate(algo, data, measures=[
+        'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
 
-algo = NormalPredictor()
-cross_validate(algo, data, measures=['RMSE'], cv=5, verbose=True)
+    print("########################################################################")
 
-########################################################################
+    # baseline estimate for given user and item
+    algo = BaselineOnly(bsl_options={}, verbose=True)
+    cross_validate(algo, data, measures=[
+        'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
 
-bsl = {
-    'method': "sgd",  # Optimization method to use.
+    print("########################################################################")
+
+    # k-NN Algorithms
+    # basic collaborative filtering algorithm
+    algo = KNNBasic(k=40, min_k=1, sim_options={}, verbose=True)
+    cross_validate(algo, data, measures=[
+        'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
+
+    print("########################################################################")
+
+    # taking into account the mean ratings of each user
+    algo = KNNWithMeans(k=40, min_k=1, sim_options={}, verbose=True)
+    cross_validate(algo, data, measures=[
+        'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
+
+    print("########################################################################")
+
+    # taking into account the z-score normalization of each user
+    algo = KNNWithZScore(k=40, min_k=1, sim_options={}, verbose=True)
+    cross_validate(algo, data, measures=[
+        'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
+
+    print("########################################################################")
+
+    # taking into account a baseline rating
+    algo = KNNBaseline(k=40, min_k=1, sim_options={}, verbose=True)
+    cross_validate(algo, data, measures=[
+        'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
+
+    print("########################################################################")
+    # Matrix Factorization
+    number_of_factors = 100  # The number of factors.
+    use_together_with_baseline_estimator = True  # Whether to use baselines.
+    # The number of iterations for the SGD optimization method.
+    number_of_epochs = 20
     # Learning rate parameter for the SGD optimization method.
-    'learning_rate': 0.005,
-    'n_epochs': 50,  # The number of iteration for the SGD optimization method.
+    learning_rate = .005
     # The regularization parameter of the cost function that is optimized: a.k.a. LAMBDA.
-    'reg': 0.02,
-}
-algo = BaselineOnly(bsl_options=bsl, verbose=True)
-cross_validate(algo, data, measures=['RMSE'], cv=5, verbose=True)
+    lambda_parameter = .02
 
-########################################################################
+    algo = SVD(n_factors=number_of_factors,
+               biased=use_together_with_baseline_estimator,
+               n_epochs=number_of_epochs,
+               lr_all=learning_rate,
+               reg_all=lambda_parameter,
+               verbose=True)
 
-max_neighbors = 40
-min_neighbors = 1
-# A dictionary of options for the similarity measure
-similarity_options = {
-    'user_based': False,  # True ==> UserUser-CF, False ==> ItemItem-CF
-    'name': "cosine",  # The name of the similarity measure to use.
-    'min_support': 3,
-    # The minimum number of common items/users for the similarity not to be zero.
-}
+    cross_validate(algo, data, measures=[
+        'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
 
-algo = KNNBasic(k=max_neighbors, min_k=min_neighbors,
-                sim_options=similarity_options, verbose=True)
+    print("########################################################################")
 
-cross_validate(algo, data, measures=['RMSE'], cv=5, verbose=True)
+    # Probabilistic Matrix Factorization
+    number_of_factors = 100  # The number of factors.
+    use_together_with_baseline_estimator = False  # Whether to use baselines.
+    # The number of iterations for the SGD optimization method.
+    number_of_epochs = 20
+    # Learning rate parameter for the SGD optimization method.
+    learning_rate = .005
+    # The regularization parameter of the cost function that is optimized: a.k.a. LAMBDA.
+    lambda_parameter = .02
 
-########################################################################
+    algo = SVD(n_factors=number_of_factors,
+               biased=use_together_with_baseline_estimator,
+               n_epochs=number_of_epochs,
+               lr_all=learning_rate,
+               reg_all=lambda_parameter,
+               verbose=True)
 
-algo = KNNWithMeans(k=max_neighbors, min_k=min_neighbors,
-                    sim_options=similarity_options, verbose=True)
+    cross_validate(algo, data, measures=[
+        'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
 
-cross_validate(algo, data, measures=['RMSE'], cv=5, verbose=True)
+    print("########################################################################")
 
-########################################################################
+    # taking into account implicit ratings
+    number_of_factors = 20
+    number_of_epochs = 20
+    learning_rate = .007
+    lambda_parameter = .02
 
-algo = KNNWithZScore(k=max_neighbors, min_k=min_neighbors,
-                     sim_options=similarity_options, verbose=True)
+    algo = SVDpp(n_factors=number_of_factors,
+                 n_epochs=number_of_epochs,
+                 lr_all=learning_rate,
+                 reg_all=lambda_parameter,
+                 verbose=True)
 
-cross_validate(algo, data, measures=['RMSE'], cv=5, verbose=True)
+    cross_validate(algo, data, measures=[
+        'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
 
-########################################################################
+    print("########################################################################")
 
-algo = KNNBaseline(k=max_neighbors, min_k=min_neighbors,
-                   sim_options=similarity_options, verbose=True)
+    # Non-negative Matrix Factorization
+    number_of_factors = 15
+    number_of_epochs = 50
+    use_together_with_baseline_estimator = False
+    learning_rate = .007
 
-cross_validate(algo, data, measures=['RMSE'], cv=5, verbose=True)
+    algo = NMF(n_factors=number_of_factors,
+               biased=use_together_with_baseline_estimator,
+               n_epochs=number_of_epochs,
+               verbose=True)
+    print()
+    cross_validate(algo, data, measures=[
+        'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
 
-########################################################################
+    print("########################################################################")
 
-number_of_factors = 100  # The number of factors.
-use_together_with_baseline_estimator = True  # Whether to use baselines.
-# The number of iterations for the SGD optimization method.
-number_of_epochs = 20
-# Learning rate parameter for the SGD optimization method.
-learning_rate = .005
-# The regularization parameter of the cost function that is optimized: a.k.a. LAMBDA.
-lambda_parameter = .02
+    # SlopeOne algorithm
+    algo = SlopeOne()
+    cross_validate(algo, data, measures=[
+        'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
 
-algo = SVD(n_factors=number_of_factors,
-           biased=use_together_with_baseline_estimator,
-           n_epochs=number_of_epochs,
-           lr_all=learning_rate,
-           reg_all=lambda_parameter,
-           verbose=True)
+    print("########################################################################")
 
-cross_validate(algo, data, measures=['RMSE'], cv=5, verbose=True)
+    # co-clustering
+    algo = CoClustering(n_cltr_u=3, n_cltr_i=3, n_epochs=20,
+                        random_state=None, verbose=False)
+    cross_validate(algo, data, measures=[
+        'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
 
-########################################################################
-
-algo = SVDpp(n_factors=number_of_factors,
-             n_epochs=number_of_epochs,
-             lr_all=learning_rate,
-             reg_all=lambda_parameter,
-             verbose=True)
-
-cross_validate(algo, data, measures=['RMSE'], cv=5, verbose=True)
-
-########################################################################
-
-algo = NMF(n_factors=number_of_factors,
-           biased=use_together_with_baseline_estimator,
-           n_epochs=number_of_epochs,
-           lr_all=learning_rate,
-           reg_all=lambda_parameter,
-           verbose=True)
-
-cross_validate(algo, data, measures=['RMSE'], cv=5, verbose=True)
+    print("########################################################################")
+    print()
+    print()
+    print("Second Dataset\n")
