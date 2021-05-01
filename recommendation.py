@@ -18,8 +18,7 @@ reader = Reader(line_format='user item rating', sep=',',
                 rating_scale=[1, 10], skip_lines=1)
 data2 = Dataset.load_from_file(file_path, reader=reader)
 jobs = 8  # number of cores
-
-print("First Dataset\n")
+"""
 for data in [data1, data2]:
     # Basic Algorithms
     # normal distribution of the training set
@@ -157,4 +156,39 @@ for data in [data1, data2]:
     print("########################################################################")
     print()
     print()
-    print("Second Dataset\n")
+"""
+for data in [data1, data2]:
+    """
+    param_grid = {'k': [10, 20, 30, 40, 50, 55, 60, 70, 80, 90], 'min_k': [1, 2, 3, 5, 10, 15],
+                  'sim_options':
+                  {'name': ['cosine', 'pearson_baseline', 'msd', 'pearson'], 'min_support': [1, 5, 10],
+                   'user_based': [True, False], 'shrinkage': [0, 50, 100, 200, 300]},
+                  'bsl_options':
+                  {'method': ['als', 'sgd'], 'n_epochs': [1, 2, 5, 10, 20, 30]
+                   }
+                  }
+
+    gs = RandomizedSearchCV(KNNBaseline, param_grid, measures=[
+                            'rmse', 'mae'], cv=5, n_jobs=jobs)
+
+    gs.fit(data)
+    print(gs.best_score['rmse'])  # best RMSE score
+    # combination of parameters that gave the best RMSE score
+    print(gs.best_params['rmse'])
+    """
+
+    start_time = time.time()
+
+    print("########################################################################")
+    param_grid = {'n_factors': [100], 'n_epochs': [40, 42, 43], 'biased': [True], 'lr_all': [0.0055, 0.006, 0.0065, 0.007],
+                  'reg_all': [0.10, 0.15, 0.2]}
+    gs = GridSearchCV(SVD, param_grid, measures=[
+                      'rmse', 'mae'], cv=5, n_jobs=jobs)
+
+    gs.fit(data)
+    print(gs.best_score['rmse'])
+    print(gs.best_params['rmse'])
+    print("########################################################################")
+
+    end_time = time.time()
+    print("Completed in:", end_time-start_time, "seconds")
