@@ -18,7 +18,7 @@ reader = Reader(line_format='user item rating', sep=',',
                 rating_scale=[1, 10], skip_lines=1)
 data2 = Dataset.load_from_file(file_path, reader=reader)
 jobs = 8  # number of cores
-"""
+
 for data in [data1, data2]:
     # Basic Algorithms
     # normal distribution of the training set
@@ -26,14 +26,10 @@ for data in [data1, data2]:
     cross_validate(algo, data, measures=[
         'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
 
-    print("########################################################################")
-
     # baseline estimate for given user and item
     algo = BaselineOnly(bsl_options={}, verbose=True)
     cross_validate(algo, data, measures=[
         'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
-
-    print("########################################################################")
 
     # k-NN Algorithms
     # basic collaborative filtering algorithm
@@ -41,28 +37,21 @@ for data in [data1, data2]:
     cross_validate(algo, data, measures=[
         'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
 
-    print("########################################################################")
-
     # taking into account the mean ratings of each user
     algo = KNNWithMeans(k=40, min_k=1, sim_options={}, verbose=True)
     cross_validate(algo, data, measures=[
         'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
-
-    print("########################################################################")
 
     # taking into account the z-score normalization of each user
     algo = KNNWithZScore(k=40, min_k=1, sim_options={}, verbose=True)
     cross_validate(algo, data, measures=[
         'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
 
-    print("########################################################################")
-
     # taking into account a baseline rating
     algo = KNNBaseline(k=40, min_k=1, sim_options={}, verbose=True)
     cross_validate(algo, data, measures=[
         'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
 
-    print("########################################################################")
     # Matrix Factorization
     number_of_factors = 100  # The number of factors.
     use_together_with_baseline_estimator = True  # Whether to use baselines.
@@ -82,8 +71,6 @@ for data in [data1, data2]:
 
     cross_validate(algo, data, measures=[
         'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
-
-    print("########################################################################")
 
     # Probabilistic Matrix Factorization
     number_of_factors = 100  # The number of factors.
@@ -105,8 +92,6 @@ for data in [data1, data2]:
     cross_validate(algo, data, measures=[
         'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
 
-    print("########################################################################")
-
     # taking into account implicit ratings
     number_of_factors = 20
     number_of_epochs = 20
@@ -122,8 +107,6 @@ for data in [data1, data2]:
     cross_validate(algo, data, measures=[
         'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
 
-    print("########################################################################")
-
     # Non-negative Matrix Factorization
     number_of_factors = 15
     number_of_epochs = 50
@@ -138,14 +121,10 @@ for data in [data1, data2]:
     cross_validate(algo, data, measures=[
         'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
 
-    print("########################################################################")
-
     # SlopeOne algorithm
     algo = SlopeOne()
     cross_validate(algo, data, measures=[
         'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
-
-    print("########################################################################")
 
     # co-clustering
     algo = CoClustering(n_cltr_u=3, n_cltr_i=3, n_epochs=20,
@@ -153,12 +132,11 @@ for data in [data1, data2]:
     cross_validate(algo, data, measures=[
         'RMSE', 'MAE'], cv=5, n_jobs=jobs, verbose=True)
 
-    print("########################################################################")
     print()
     print()
-"""
-for data in [data1, data2]:
-    """
+
+for data in [data2, data1]:
+
     param_grid = {'k': [10, 20, 30, 40, 50, 55, 60, 70, 80, 90], 'min_k': [1, 2, 3, 5, 10, 15],
                   'sim_options':
                   {'name': ['cosine', 'pearson_baseline', 'msd', 'pearson'], 'min_support': [1, 5, 10],
@@ -175,20 +153,17 @@ for data in [data1, data2]:
     print(gs.best_score['rmse'])  # best RMSE score
     # combination of parameters that gave the best RMSE score
     print(gs.best_params['rmse'])
-    """
 
     start_time = time.time()
 
-    print("########################################################################")
-    param_grid = {'n_factors': [100], 'n_epochs': [40, 42, 43], 'biased': [True], 'lr_all': [0.0055, 0.006, 0.0065, 0.007],
-                  'reg_all': [0.10, 0.15, 0.2]}
+    param_grid = {'n_epochs': [40, 42, 43], 'lr_all': [
+        0.0055, 0.006, 0.0065, 0.007], 'reg_all': [0.10, 0.15, 0.2]}
     gs = GridSearchCV(SVD, param_grid, measures=[
                       'rmse', 'mae'], cv=5, n_jobs=jobs)
 
     gs.fit(data)
     print(gs.best_score['rmse'])
     print(gs.best_params['rmse'])
-    print("########################################################################")
 
     end_time = time.time()
     print("Completed in:", end_time-start_time, "seconds")
