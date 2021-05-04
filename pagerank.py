@@ -32,7 +32,7 @@ file_handler.close()
 # print("Number of nodes in the graph", graph.number_of_nodes())
 # print()
 
-
+# pokemon sets
 set_A = set(["Pikachu"])
 set_B = set(["Venusaur", "Charizard", "Blastoise"])
 set_C = set(["Excadrill", "Dracovish", "Whimsicott", "Milotic"])
@@ -60,7 +60,7 @@ for node_id in graph:
     if "Pikachu" not in node_id:
         set_NOT_A.add(node_id)
 
-    if ("Venusaur" not in node_id) and ("Charizard" not in node_id) and ("Blastoise" not in node_id):
+    if ("Venusaur" not in node_id) and ("Charizard" not in node_id) and ("Blasmax_conductancetoise" not in node_id):
         set_NOT_B.add(node_id)
 
     if ("Excadrill" not in node_id) and ("Dracovish" not in node_id) and ("Whimsicott" not in node_id) and ("Milotic" not in node_id):

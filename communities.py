@@ -54,13 +54,12 @@ def good_local_community(graph, seed_node_id, alpha=0.9):
 
 
 input_graph = "./dataset/pkmn_graph_data.tsv"
-k = 6
 # Graph creation by reading the list of unweighted edges from file
 file_handler = open(input_graph, 'r', encoding="utf-8")
 csv_reader = csv.reader(file_handler, delimiter='\t',
                         quotechar='"', quoting=csv.QUOTE_NONE)
 u_v = []
-graph = nx.karate_club_graph()
+graph = nx.Graph()
 for record in csv_reader:
     u = record[0]
     v = record[1]
@@ -68,12 +67,20 @@ for record in csv_reader:
 
 file_handler.close()
 
-#nx.draw(graph, with_labels=True, font_weight='bold')
-# plt.show()
+alpha = [0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55,
+         0.5, 0.45, 0.4, 0.35, 0.3, 0.25, 0.2, 0.15, 0.1, 0.05]
 
+pokemon_in_communities = {}
 for node_id in graph:
-    for damping_factor in [0.95, 0.9, 0.85, 0.8, 0.75, 0.7, 0.65, 0.6, 0.55, 0.5, 0.45, 0.4, 0.35, 0.3, 0.25, 0.2, 0.15, 0.1, 0.05]:
+    pokemon_in_communities[node_id] = 0
+for node_id in graph:
+    max_conductance = float("-inf")
+    for damping_factor in alpha:
         local_community, conductance = good_local_community(
             graph, node_id, alpha=damping_factor)
         if (conductance == 0 or conductance == 1 or len(local_community) > 140):
             continue
+        if (conductance > max_conductance):
+            max_conductance = conductance
+            max_community = local_community
+            best_a = damping_factor

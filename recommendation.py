@@ -1,6 +1,5 @@
 import os
 import time
-from multiprocessing import Pool
 from surprise import SVD
 
 from surprise import Reader
@@ -19,7 +18,8 @@ reader = Reader(line_format='user item rating', sep=',',
 data2 = Dataset.load_from_file(file_path, reader=reader)
 jobs = 8  # number of cores
 
-for data in [data1, data2]:
+# part 1
+for data in [data1, data2]:  # for both datasets, try all prediction algorithms
     # Basic Algorithms
     # normal distribution of the training set
     algo = NormalPredictor()
@@ -135,7 +135,8 @@ for data in [data1, data2]:
     print()
     print()
 
-for data in [data2, data1]:
+# part 2
+for data in [data1, data2]:  # for both datasets ,try different configurations of knnbaseline, SVD
 
     param_grid = {'k': [10, 20, 30, 40, 50, 55, 60, 70, 80, 90], 'min_k': [1, 2, 3, 5, 10, 15],
                   'sim_options':
@@ -154,7 +155,7 @@ for data in [data2, data1]:
     # combination of parameters that gave the best RMSE score
     print(gs.best_params['rmse'])
 
-    start_time = time.time()
+    #start_time = time.time()
 
     param_grid = {'n_epochs': [40, 42, 43], 'lr_all': [
         0.0055, 0.006, 0.0065, 0.007], 'reg_all': [0.10, 0.15, 0.2]}
@@ -165,5 +166,5 @@ for data in [data2, data1]:
     print(gs.best_score['rmse'])
     print(gs.best_params['rmse'])
 
-    end_time = time.time()
-    print("Completed in:", end_time-start_time, "seconds")
+    #end_time = time.time()
+    #print("Completed in:", end_time-start_time, "seconds")
