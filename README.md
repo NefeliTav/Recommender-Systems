@@ -1,4 +1,4 @@
-# Recommendation-System
+# Recommendation Systems
 I tried all prediction algorithms offered by the Surprise library, (Basic, k-NN, Matrix Factorization) and then i compared different configurations for KNNBaseline and SVD.
 
 # Pagerank
