@@ -8,11 +8,11 @@ from surprise import Dataset
 from surprise.model_selection import *
 from surprise.prediction_algorithms import *
 
-file_path = os.path.expanduser('./dataset/ratings_1.csv')
+file_path = os.path.expanduser('../dataset/ratings_1.csv')
 reader = Reader(line_format='user item rating', sep=',',
                 rating_scale=[1, 5], skip_lines=1)
 data1 = Dataset.load_from_file(file_path, reader=reader)
-file_path = os.path.expanduser('./dataset/ratings_2.csv')
+file_path = os.path.expanduser('../dataset/ratings_2.csv')
 reader = Reader(line_format='user item rating', sep=',',
                 rating_scale=[1, 10], skip_lines=1)
 data2 = Dataset.load_from_file(file_path, reader=reader)

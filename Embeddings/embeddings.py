@@ -20,10 +20,10 @@ model = SentenceTransformer('paraphrase-distilroberta-base-v1')
 
 # Get embeddings
 
-with open('./datasets/train_set.jsonl', 'r') as json_file:
+with open('../datasets/train_set.jsonl', 'r') as json_file:
     json_list = list(json_file)
 
-outfile = open('./datasets/emb_train.jsonl', 'w')
+outfile = open('../datasets/emb_train.jsonl', 'w')
 for json_str in json_list:
     result = json.loads(json_str)
     claims_train = {}
@@ -45,10 +45,10 @@ json_file.close()
 outfile.close()
 
 
-with open('./datasets/dev_set.jsonl', 'r') as json_file:
+with open('../datasets/dev_set.jsonl', 'r') as json_file:
     json_list = list(json_file)
 
-outfile = open('./datasets/emb_dev.jsonl', 'w')
+outfile = open('../datasets/emb_dev.jsonl', 'w')
 sentences = []
 for json_str in json_list:
     result = json.loads(json_str)
@@ -72,10 +72,10 @@ json_file.close()
 outfile.close()
 
 
-with open('./datasets/test_set.jsonl', 'r') as json_file:
+with open('../datasets/test_set.jsonl', 'r') as json_file:
     json_list = list(json_file)
 
-outfile = open('./datasets/emb_test.jsonl', 'w')
+outfile = open('../datasets/emb_test.jsonl', 'w')
 sentences = []
 for json_str in json_list:
     result = json.loads(json_str)
@@ -94,7 +94,7 @@ json_file.close()
 outfile.close()
 
 # Train
-with open('./datasets/emb_train.jsonl', 'r') as json_file:
+with open('../datasets/emb_train.jsonl', 'r') as json_file:
     json_list = list(json_file)
 
 data = {}
@@ -153,7 +153,7 @@ json_file.close()
 
 
 # Test
-with open('./datasets/emb_dev.jsonl', 'r') as json_file:
+with open('../datasets/emb_dev.jsonl', 'r') as json_file:
     json_list = list(json_file)
 data = {}
 data["Embeddings"] = []
@@ -199,7 +199,7 @@ print(metrics.classification_report(y_test, predicted))
 json_file.close()
 
 # Train
-with open('./datasets/emb_train.jsonl', 'r') as json_file:
+with open('../datasets/emb_train.jsonl', 'r') as json_file:
     json_list = list(json_file)
 
 data = {}
@@ -236,7 +236,7 @@ json_file.close()
 
 
 # Test
-with open('./datasets/emb_dev.jsonl', 'r') as json_file:
+with open('../datasets/emb_dev.jsonl', 'r') as json_file:
     json_list = list(json_file)
 data = {}
 data["Embeddings"] = []
@@ -275,7 +275,7 @@ print(metrics.classification_report(y_test, predicted))
 json_file.close()
 
 # Apply model - Classify
-with open('./datasets/emb_test.jsonl', 'r') as json_file:
+with open('../datasets/emb_test.jsonl', 'r') as json_file:
     json_list = list(json_file)
 data = {}
 data["Embeddings"] = []
@@ -293,7 +293,7 @@ x_test = np.array(data["Embeddings"])
 y_test = np.array(data["Label"])
 
 # Random Forest
-outfile = open('./datasets/test_set_pred_1.jsonl', 'w')
+outfile = open('../datasets/test_set_pred_1.jsonl', 'w')
 predicted = pd.DataFrame(rf.predict(x_test))
 arr = predicted.values.tolist()
 
@@ -318,7 +318,7 @@ for id, output in zip(data["id"], clean_arr):
 outfile.close()
 
 # KNN
-outfile = open('./datasets/test_set_pred_2.jsonl', 'w')
+outfile = open('../datasets/test_set_pred_2.jsonl', 'w')
 predicted = pd.DataFrame(knn_model.predict(x_test))
 arr = predicted.values.tolist()
 

@@ -53,7 +53,7 @@ def good_local_community(graph, seed_node_id, alpha=0.9):
     return minimum_conductance_nodes, min_conductance_value
 
 
-input_graph = "./dataset/pkmn_graph_data.tsv"
+input_graph = "../dataset/pkmn_graph_data.tsv"
 # Graph creation by reading the list of unweighted edges from file
 file_handler = open(input_graph, 'r', encoding="utf-8")
 csv_reader = csv.reader(file_handler, delimiter='\t',

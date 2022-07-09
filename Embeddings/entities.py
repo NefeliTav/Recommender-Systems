@@ -4,7 +4,7 @@ import re
 model = GENRE.from_pretrained(
     "./hf_e2e_entity_linking_wiki_abs").eval()
 
-with open('./datasets/emb_train.jsonl', 'r') as json_file:
+with open('../datasets/emb_train.jsonl', 'r') as json_file:
     json_list = list(json_file)
 
 #claim = {}

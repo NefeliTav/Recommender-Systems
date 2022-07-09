@@ -11,7 +11,7 @@ def compute_top_k(map__node_id__score, k=20):
     return list__node_id__score[:k]
 
 
-input_graph = "./dataset/pkmn_graph_data.tsv"
+input_graph = "../dataset/pkmn_graph_data.tsv"
 k = 6
 # Graph creation by reading the list of unweighted edges from file
 file_handler = open(input_graph, 'r', encoding="utf-8")
