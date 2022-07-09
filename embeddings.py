@@ -19,7 +19,7 @@ from sentence_transformers import SentenceTransformer, models
 model = SentenceTransformer('paraphrase-distilroberta-base-v1')
 
 # Get embeddings
-"""
+
 with open('./datasets/train_set.jsonl', 'r') as json_file:
     json_list = list(json_file)
 
@@ -105,6 +105,7 @@ for json_str in json_list:
     result = json.loads(json_str)
 
     data["Embeddings"].append(np.array(result["claim_embedding"]))
+    # encode
     if result["output"][0]["answer"] == "SUPPORTS":
         data["Label"].append(1)
     elif result["output"][0]["answer"] == "REFUTES":
@@ -118,10 +119,12 @@ y_train = np.array(data["Label"])
 param_grid_rf = {'max_features': ["auto", "sqrt", "log2"], 'criterion': [
     "gini", "entropy"], 'max_depth': [None, 5, 10, 12], 'min_samples_split': [2, 5, 7]}
 rf = RandomForestClassifier()
+
+# cross validation
 grid_rf = GridSearchCV(rf, param_grid_rf)
 
 grid_rf = grid_rf.fit(x_train, y_train)
-print(grid_rf.score(x_train, y_train))  # = 0.9992569022350094
+print(grid_rf.score(x_train, y_train))
 # print best parameter after tuning
 print(grid_rf.best_params_)
 print(grid_rf.best_score_)
@@ -135,10 +138,12 @@ param_grid_knn = {'n_neighbors': [3, 5, 7], 'weights': [
 
 #ss = StandardScaler()
 knn_model = KNeighborsClassifier()
+
+# cross validation
 grid_knn = GridSearchCV(knn_model, param_grid_knn)
 
 grid_knn = grid_knn.fit(x_train, y_train)
-print(grid_knn.score(x_train, y_train))  # = 0.8259531657870167
+print(grid_knn.score(x_train, y_train))
 print(grid_knn.best_params_)
 print(grid_knn.best_score_)
 print(grid_knn.best_estimator_)
@@ -192,7 +197,6 @@ print(metrics.classification_report(y_test, predicted))
 
 
 json_file.close()
-"""
 
 # Train
 with open('./datasets/emb_train.jsonl', 'r') as json_file:
@@ -270,7 +274,7 @@ print(metrics.classification_report(y_test, predicted))
 
 json_file.close()
 
-# Apply model
+# Apply model - Classify
 with open('./datasets/emb_test.jsonl', 'r') as json_file:
     json_list = list(json_file)
 data = {}
